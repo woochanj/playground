@@ -1,26 +1,64 @@
 @import "tailwindcss";
 
 :root {
+  /* 토스증권 실제 추출 팔레트 */
   --background: #ffffff;
-  --foreground: #171717;
+  --sidebar: #fbfcfd; /* 거의 흰색 사이드바 */
+  --surface: #ffffff;
+  --foreground: #191f28; /* 제목/진한 텍스트 (#333D4B~) */
+  --body: #4e5968; /* 본문 rgb(78,89,104) */
+  --muted: #8b95a1; /* 보조 텍스트 */
+  --border: #f2f4f6; /* 옅은 구분선 */
+  --border-strong: #e5e8eb;
+  --hover: #f7f8fa; /* rgba(7,25,76,.04) 호버 */
+  --fill: rgba(2, 32, 71, 0.05); /* 토스 보조 버튼/필 배경 */
+  --fill-hover: rgba(2, 32, 71, 0.09);
+  --primary: #2272eb; /* 토스 블루 rgb(34,114,235) */
+  --primary-hover: #1b64da;
+  --primary-soft: #e8f3ff; /* 연한 파랑 배경 */
+  --up: #f04452; /* 상승 빨강 */
+  --up-soft: #ffeaec;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-sidebar: var(--sidebar);
+  --color-surface: var(--surface);
   --color-foreground: var(--foreground);
+  --color-body: var(--body);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-hover: var(--hover);
+  --color-fill: var(--fill);
+  --color-fill-hover: var(--fill-hover);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-up: var(--up);
+  --color-up-soft: var(--up-soft);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* 토스 실제값: 카드 8px, pill 999px — 과하게 둥글지 않게 */
+  --radius-toss: 8px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  /* Toss Product Sans는 사내 폰트 미보유 → 시스템 한글 폰트 우선 */
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont,
+    "Apple SD Gothic Neo", "Noto Sans KR", var(--font-geist-sans),
+    "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  letter-spacing: -0.01em; /* 토스식 살짝 좁은 자간 */
+}
+
+/* 게시글 본문 줄바꿈 보존 */
+.post-body {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.8;
+  color: var(--body);
 }

@@ -32,6 +32,14 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# uploaded files (local disk storage)
+/uploads
+
+# playwright / 스크린샷 (테스트 산출물)
+/.playwright-mcp/
+/*.png
 
 # vercel
 .vercel
