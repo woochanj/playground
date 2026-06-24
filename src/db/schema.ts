@@ -8,6 +8,7 @@ import {
   boolean,
   pgEnum,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -107,6 +108,52 @@ export const notifications = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("notifications_user_idx").on(t.userId)],
+);
+
+// ── 채팅 메시지 ───────────────────────────────────────
+// 전사 통합 채팅방 1개 (슬랙식 #general). 이력은 DB에 보존.
+export const chatMessages = pgTable(
+  "chat_messages",
+  {
+    id: serial("id").primaryKey(),
+    authorId: integer("author_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("chat_created_idx").on(t.createdAt)],
+);
+
+// ── 공동편집 스프레드시트 ─────────────────────────────
+export const sheets = pgTable("sheets", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 128 }).notNull(),
+  rows: integer("rows").notNull().default(50),
+  cols: integer("cols").notNull().default(12),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// 셀 값. (sheetId, row, col)이 유일. 빈 셀은 행 없음.
+export const sheetCells = pgTable(
+  "sheet_cells",
+  {
+    id: serial("id").primaryKey(),
+    sheetId: integer("sheet_id")
+      .notNull()
+      .references(() => sheets.id, { onDelete: "cascade" }),
+    row: integer("row").notNull(),
+    col: integer("col").notNull(),
+    value: text("value").notNull().default(""),
+    updatedBy: integer("updated_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("sheet_cell_unique").on(t.sheetId, t.row, t.col),
+    index("sheet_cell_sheet_idx").on(t.sheetId),
+  ],
 );
 
 // ── 관계 정의 ─────────────────────────────────────────

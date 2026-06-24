@@ -8,6 +8,13 @@
       "when": 1782263727276,
       "tag": "0000_cold_gabe_jones",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782265827132,
+      "tag": "0001_broad_valeria_richards",
+      "breakpoints": true
     }
   ]
 }

@@ -3,7 +3,7 @@ config({ path: ".env" });
 
 import bcrypt from "bcryptjs";
 import { db } from "./index";
-import { users, boards } from "./schema";
+import { users, boards, sheets } from "./schema";
 import { eq } from "drizzle-orm";
 
 async function seed() {
@@ -41,6 +41,13 @@ async function seed() {
     console.log("  + 관리자 계정 생성: admin / admin1234  (로그인 후 비밀번호를 꼭 변경하세요)");
   } else {
     console.log("  · 관리자 계정이 이미 있습니다.");
+  }
+
+  // ── 기본 공유 시트 ──
+  const existingSheet = await db.select().from(sheets).limit(1);
+  if (existingSheet.length === 0) {
+    await db.insert(sheets).values({ name: "공유 시트", rows: 50, cols: 12 });
+    console.log("  + 공유 시트 생성: 공유 시트 (50×12)");
   }
 
   console.log("✅ 시드 완료");

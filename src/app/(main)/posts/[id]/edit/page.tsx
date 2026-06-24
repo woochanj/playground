@@ -3,7 +3,7 @@ import { getPostById, getAttachmentsByPost } from "@/lib/queries";
 import { requireUser } from "@/lib/session";
 import { formatFileSize } from "@/lib/format";
 import { deleteAttachment } from "@/app/actions/post";
-import PostForm from "@/app/boards/[slug]/new/PostForm";
+import PostForm from "@/app/(main)/boards/[slug]/new/PostForm";
 
 export default async function EditPostPage({
   params,

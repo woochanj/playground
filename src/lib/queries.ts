@@ -7,6 +7,9 @@ import {
   users,
   attachments,
   notifications,
+  chatMessages,
+  sheets,
+  sheetCells,
 } from "@/db/schema";
 
 export const PAGE_SIZE = 20;
@@ -140,4 +143,48 @@ export async function getUnreadNotificationCount(userId: number) {
     .from(notifications)
     .where(and(eq(notifications.userId, userId), eq(notifications.read, false)));
   return Number(count);
+}
+
+/** 최근 채팅 메시지(오래된 순으로 반환, 최신 N개). */
+export async function getRecentChatMessages(limit = 100) {
+  const rows = await db
+    .select({
+      id: chatMessages.id,
+      content: chatMessages.content,
+      createdAt: chatMessages.createdAt,
+      authorId: chatMessages.authorId,
+      authorName: users.name,
+    })
+    .from(chatMessages)
+    .innerJoin(users, eq(chatMessages.authorId, users.id))
+    .orderBy(desc(chatMessages.createdAt))
+    .limit(limit);
+  return rows.reverse();
+}
+
+/** 전체 시트 목록 (최신순, 셀 개수 포함). */
+export async function getSheets() {
+  return db
+    .select({
+      id: sheets.id,
+      name: sheets.name,
+      rows: sheets.rows,
+      cols: sheets.cols,
+      createdAt: sheets.createdAt,
+      cellCount: sql<number>`(select count(*) from ${sheetCells} where ${sheetCells.sheetId} = ${sheets.id})`,
+    })
+    .from(sheets)
+    .orderBy(desc(sheets.createdAt));
+}
+
+/** 첫 번째(기본) 공유 시트. */
+export async function getDefaultSheet() {
+  const [sheet] = await db.select().from(sheets).orderBy(sheets.id).limit(1);
+  return sheet ?? null;
+}
+
+/** id로 시트. */
+export async function getSheetById(id: number) {
+  const [sheet] = await db.select().from(sheets).where(eq(sheets.id, id)).limit(1);
+  return sheet ?? null;
 }
