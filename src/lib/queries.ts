@@ -162,6 +162,23 @@ export async function getRecentChatMessages(limit = 100) {
   return rows.reverse();
 }
 
+/** 전체 회원 목록 (관리자용, 가입 최신순, 글/댓글 수 포함). */
+export async function getMembers() {
+  return db
+    .select({
+      id: users.id,
+      username: users.username,
+      name: users.name,
+      department: users.department,
+      role: users.role,
+      createdAt: users.createdAt,
+      postCount: sql<number>`(select count(*) from ${posts} where ${posts.authorId} = ${users.id})`,
+      commentCount: sql<number>`(select count(*) from ${comments} where ${comments.authorId} = ${users.id})`,
+    })
+    .from(users)
+    .orderBy(desc(users.createdAt));
+}
+
 /** 전체 시트 목록 (최신순, 셀 개수 포함). */
 export async function getSheets() {
   return db

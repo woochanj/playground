@@ -18,6 +18,11 @@ const ITEMS: NavItem[] = [
   { href: "/sheet", label: "시트", match: (p) => p.startsWith("/sheet") },
 ];
 
+// 관리자에게만 보이는 메뉴
+const ADMIN_ITEMS: NavItem[] = [
+  { href: "/admin/members", label: "회원 관리", match: (p) => p.startsWith("/admin") },
+];
+
 export default function TopNav({
   user,
   unread,
@@ -37,7 +42,7 @@ export default function TopNav({
 
         {/* 메뉴 (토스: 14px / 600 / 활성 진하게) */}
         <nav className="flex items-center gap-6">
-          {ITEMS.map((it) => {
+          {(user?.role === "admin" ? [...ITEMS, ...ADMIN_ITEMS] : ITEMS).map((it) => {
             const active = it.match(pathname);
             return (
               <Link
