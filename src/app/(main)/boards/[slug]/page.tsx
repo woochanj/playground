@@ -49,7 +49,7 @@ export default async function BoardPage({
         )}
       </header>
 
-      <div className="overflow-hidden rounded-lg border border-border bg-surface">
+      <div className="overflow-hidden toss-card">
         {rows.length === 0 ? (
           <p className="px-5 py-16 text-center text-[15px] text-muted">
             아직 게시글이 없습니다.

@@ -21,7 +21,7 @@ export default async function Home() {
           <Link
             key={b.id}
             href={`/boards/${b.slug}`}
-            className="group rounded-lg border border-border bg-surface p-5 transition-all hover:border-primary/40 hover:bg-primary-soft/30"
+            className="group toss-card p-5 transition-all hover:-translate-y-0.5 hover:bg-primary-soft/30"
           >
             <div className="flex items-center gap-1.5">
               <span className="text-muted group-hover:text-primary">#</span>

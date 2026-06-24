@@ -20,7 +20,7 @@ export default async function MembersAdminPage() {
 
       <AddMemberForm />
 
-      <div className="overflow-hidden rounded-lg border border-border bg-surface">
+      <div className="overflow-hidden toss-card">
         <table className="w-full text-sm">
           <thead className="border-b border-border bg-fill text-muted">
             <tr>

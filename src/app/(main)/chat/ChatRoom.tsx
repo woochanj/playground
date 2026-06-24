@@ -61,7 +61,7 @@ export default function ChatRoom({ currentUserId, initialMessages }: Props) {
       </header>
 
       {/* 메시지 목록 */}
-      <div className="flex-1 overflow-y-auto rounded-lg border border-border bg-surface p-4">
+      <div className="flex-1 overflow-y-auto toss-card p-4">
         {messages.length === 0 ? (
           <p className="py-16 text-center text-sm text-muted">
             아직 메시지가 없습니다. 첫 인사를 남겨보세요.
@@ -111,7 +111,7 @@ export default function ChatRoom({ currentUserId, initialMessages }: Props) {
           }}
           rows={1}
           placeholder="메시지를 입력하세요 (Enter 전송, Shift+Enter 줄바꿈)"
-          className="max-h-32 flex-1 resize-none rounded-lg border border-border-strong bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
+          className="toss-input max-h-32 flex-1 resize-none text-sm"
         />
         <button
           onClick={submit}

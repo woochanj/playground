@@ -38,7 +38,7 @@ export default function PostForm(props: Props) {
         required
         placeholder="제목"
         defaultValue={props.mode === "edit" ? props.initial.title : ""}
-        className="rounded-lg border border-border-strong bg-surface px-4 py-3 text-lg font-semibold outline-none focus:border-primary"
+        className="toss-input text-lg font-semibold"
       />
 
       <textarea
@@ -47,7 +47,7 @@ export default function PostForm(props: Props) {
         rows={14}
         placeholder="내용을 입력하세요"
         defaultValue={props.mode === "edit" ? props.initial.content : ""}
-        className="resize-y rounded-lg border border-border-strong bg-surface px-4 py-3 leading-relaxed outline-none focus:border-primary"
+        className="toss-input resize-y leading-relaxed"
       />
 
       <div>

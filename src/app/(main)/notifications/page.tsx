@@ -31,11 +31,11 @@ export default async function NotificationsPage() {
       </header>
 
       {items.length === 0 ? (
-        <p className="rounded-lg border border-border bg-surface px-5 py-16 text-center text-[15px] text-muted">
+        <p className="toss-card px-5 py-16 text-center text-[15px] text-muted">
           알림이 없습니다.
         </p>
       ) : (
-        <ul className="overflow-hidden rounded-lg border border-border bg-surface">
+        <ul className="overflow-hidden toss-card">
           {items.map((n) => (
             <li
               key={n.id}

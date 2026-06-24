@@ -18,7 +18,7 @@ export default function AddMemberForm() {
     <form
       ref={formRef}
       action={action}
-      className="rounded-lg border border-border bg-surface p-5"
+      className="toss-card p-5"
     >
       <h2 className="mb-4 text-base font-bold text-foreground">회원 추가</h2>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -28,7 +28,7 @@ export default function AddMemberForm() {
             name="username"
             required
             placeholder="사번 또는 사내 아이디"
-            className="rounded-lg border border-border-strong bg-surface px-3 py-2 outline-none focus:border-primary"
+            className="toss-input"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -37,7 +37,7 @@ export default function AddMemberForm() {
             name="name"
             required
             placeholder="홍길동"
-            className="rounded-lg border border-border-strong bg-surface px-3 py-2 outline-none focus:border-primary"
+            className="toss-input"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -45,7 +45,7 @@ export default function AddMemberForm() {
           <input
             name="department"
             placeholder="개발팀"
-            className="rounded-lg border border-border-strong bg-surface px-3 py-2 outline-none focus:border-primary"
+            className="toss-input"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -55,7 +55,7 @@ export default function AddMemberForm() {
             type="text"
             required
             placeholder="4자 이상"
-            className="rounded-lg border border-border-strong bg-surface px-3 py-2 outline-none focus:border-primary"
+            className="toss-input"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -63,7 +63,7 @@ export default function AddMemberForm() {
           <select
             name="role"
             defaultValue="member"
-            className="rounded-lg border border-border-strong bg-surface px-3 py-2 outline-none focus:border-primary"
+            className="toss-input"
           >
             <option value="member">일반회원</option>
             <option value="admin">관리자</option>

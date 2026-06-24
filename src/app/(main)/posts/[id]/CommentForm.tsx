@@ -25,7 +25,7 @@ export default function CommentForm({ postId }: { postId: number }) {
         required
         rows={3}
         placeholder="댓글을 입력하세요"
-        className="resize-y rounded-lg border border-border-strong bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
+        className="toss-input resize-y text-sm"
       />
       {state.error && (
         <p className="text-sm text-up">{state.error}</p>

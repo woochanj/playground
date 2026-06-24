@@ -255,7 +255,7 @@ export default function SheetGrid({
         있고, 변경은 모두에게 실시간으로 공유됩니다.
       </p>
 
-      <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-border bg-surface">
+      <div className="min-h-0 flex-1 overflow-auto toss-card">
         <table className="border-collapse text-sm" style={{ tableLayout: "fixed" }}>
           <colgroup>
             <col style={{ width: ROW_HEADER_W }} />

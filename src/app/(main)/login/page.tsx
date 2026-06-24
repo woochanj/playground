@@ -15,7 +15,7 @@ export default async function LoginPage({
 
   return (
     <div className="mx-auto mt-12 max-w-sm">
-      <div className="rounded-lg border border-border bg-surface p-6 shadow-sm">
+      <div className="toss-card p-6">
         <h1 className="mb-1 text-xl font-bold text-foreground">로그인</h1>
         <p className="mb-6 text-sm text-muted">사내 계정으로 로그인하세요.</p>
         <LoginForm callbackUrl={callbackUrl || "/"} />

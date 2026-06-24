@@ -21,7 +21,7 @@ export default function LoginForm({ callbackUrl }: { callbackUrl: string }) {
           autoComplete="username"
           required
           autoFocus
-          className="rounded-md border border-border bg-surface px-3 py-2 outline-none focus:border-primary"
+          className="toss-input"
         />
       </label>
 
@@ -32,7 +32,7 @@ export default function LoginForm({ callbackUrl }: { callbackUrl: string }) {
           type="password"
           autoComplete="current-password"
           required
-          className="rounded-md border border-border bg-surface px-3 py-2 outline-none focus:border-primary"
+          className="toss-input"
         />
       </label>
 

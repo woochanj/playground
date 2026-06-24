@@ -33,7 +33,7 @@ export default function NewSheetButton() {
                   type="text"
                   autoFocus
                   placeholder="제목 없는 시트"
-                  className="rounded-lg border border-border-strong bg-surface px-3 py-2 outline-none focus:border-primary"
+                  className="toss-input"
                 />
               </label>
               <div className="flex gap-3">
@@ -42,10 +42,10 @@ export default function NewSheetButton() {
                   <input
                     name="rows"
                     type="number"
-                    defaultValue={50}
+                    defaultValue={100}
                     min={10}
                     max={500}
-                    className="rounded-lg border border-border-strong bg-surface px-3 py-2 outline-none focus:border-primary"
+                    className="toss-input"
                   />
                 </label>
                 <label className="flex flex-1 flex-col gap-1 text-sm">
@@ -53,10 +53,10 @@ export default function NewSheetButton() {
                   <input
                     name="cols"
                     type="number"
-                    defaultValue={12}
+                    defaultValue={26}
                     min={5}
                     max={52}
-                    className="rounded-lg border border-border-strong bg-surface px-3 py-2 outline-none focus:border-primary"
+                    className="toss-input"
                   />
                 </label>
               </div>
