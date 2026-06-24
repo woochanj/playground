@@ -60,6 +60,9 @@ export default function SheetGrid({
   const editingRef = useRef(editing);
   editingRef.current = editing;
 
+  // 그리드 컨테이너 (붙여넣기/키보드 포커스 대상)
+  const gridRef = useRef<HTMLDivElement>(null);
+
   const colW = (c: number) => colWidths[String(c)] ?? DEFAULT_COL_WIDTH;
   const rowH = (r: number) => rowHeights[String(r)] ?? DEFAULT_ROW_HEIGHT;
 
@@ -204,6 +207,61 @@ export default function SheetGrid({
     setEditing(null);
   };
 
+  // 선택 셀을 시작점으로 편집 (초기 글자 옵션)
+  const beginEditAt = (row: number, col: number, initial?: string) => {
+    if (locks.has(key(row, col))) {
+      setDenied(`${locks.get(key(row, col))!.userName}님이 편집 중입니다.`);
+      setTimeout(() => setDenied(null), 2500);
+      return;
+    }
+    send({ type: "sheet:lock", sheetId, row, col });
+    setEditing({ row, col });
+    setEditValue(initial ?? cells.get(key(row, col)) ?? "");
+  };
+
+  // 그리드에 포커스가 있고 편집 중이 아닐 때의 키 처리 (구글시트식)
+  const handleGridKeyDown = (e: React.KeyboardEvent) => {
+    if (editing) return; // 편집 중엔 input이 처리
+    const { row, col } = selected;
+    const move = (dr: number, dc: number) => {
+      e.preventDefault();
+      setSelected({
+        row: Math.max(0, Math.min(rows - 1, row + dr)),
+        col: Math.max(0, Math.min(cols - 1, col + dc)),
+      });
+    };
+
+    if (e.key === "ArrowUp") return move(-1, 0);
+    if (e.key === "ArrowDown" || e.key === "Enter") return move(1, 0);
+    if (e.key === "ArrowLeft") return move(0, -1);
+    if (e.key === "ArrowRight") return move(0, 1);
+    if (e.key === "Tab") {
+      e.preventDefault();
+      return move(0, e.shiftKey ? -1 : 1);
+    }
+    if (e.key === "F2") {
+      e.preventDefault();
+      return beginEditAt(row, col);
+    }
+    if (e.key === "Delete" || e.key === "Backspace") {
+      e.preventDefault();
+      // 셀 비우기
+      setCells((prev) => {
+        const next = new Map(prev);
+        next.set(key(row, col), "");
+        return next;
+      });
+      send({ type: "sheet:set", sheetId, row, col, value: "" });
+      send({ type: "sheet:unlock", sheetId, row, col });
+      return;
+    }
+    // 인쇄 가능한 한 글자 입력 → 그 글자로 편집 시작
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      e.preventDefault();
+      beginEditAt(row, col, e.key);
+    }
+  };
+
   // ── 드래그 리사이즈 ──
   const dragRef = useRef<{
     dim: "col" | "row";
@@ -334,8 +392,10 @@ export default function SheetGrid({
 
       <div
         className="min-h-0 flex-1 overflow-auto toss-card outline-none"
+        ref={gridRef}
         tabIndex={0}
         onPaste={handlePaste}
+        onKeyDown={handleGridKeyDown}
       >
         <table className="border-collapse text-sm" style={{ tableLayout: "fixed" }}>
           <colgroup>
@@ -385,7 +445,13 @@ export default function SheetGrid({
                     <td
                       key={c}
                       onClick={() => {
-                        setSelected({ row: r, col: c });
+                        // 단일 클릭: 선택만 (편집 X) — 붙여넣기/타이핑 대기
+                        if (!isEditing) {
+                          setSelected({ row: r, col: c });
+                          gridRef.current?.focus();
+                        }
+                      }}
+                      onDoubleClick={() => {
                         if (!isEditing) startEdit(r, c);
                       }}
                       className="relative cursor-cell border-b border-r border-border p-0 align-top"
