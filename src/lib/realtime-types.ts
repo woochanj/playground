@@ -18,6 +18,12 @@ export type ClientMessage =
   | { type: "sheet:unlock"; sheetId: number; row: number; col: number }
   // 시트: 셀 값 확정 저장
   | { type: "sheet:set"; sheetId: number; row: number; col: number; value: string }
+  // 시트: 여러 셀 일괄 저장 (붙여넣기)
+  | {
+      type: "sheet:set-bulk";
+      sheetId: number;
+      cells: { row: number; col: number; value: string }[];
+    }
   // 시트: 열 너비 / 행 높이 변경 (dim: "col" | "row")
   | { type: "sheet:resize"; sheetId: number; dim: "col" | "row"; index: number; size: number };
 
@@ -59,6 +65,13 @@ export type ServerMessage =
   | { type: "sheet:resize"; sheetId: number; dim: "col" | "row"; index: number; size: number }
   // 시트: 셀 값 변경 브로드캐스트
   | { type: "sheet:cell"; sheetId: number; row: number; col: number; value: string; userId: number }
+  // 시트: 여러 셀 일괄 변경 브로드캐스트 (붙여넣기)
+  | {
+      type: "sheet:cells";
+      sheetId: number;
+      cells: { row: number; col: number; value: string }[];
+      userId: number;
+    }
   // 시트: 셀 잠김
   | { type: "sheet:locked"; sheetId: number; lock: LockPayload }
   // 시트: 셀 잠금 해제

@@ -237,6 +237,53 @@ async function handleMessage(client: Client, raw: ClientMessage) {
       break;
     }
 
+    case "sheet:set-bulk": {
+      const { sheetId, cells } = raw;
+      if (!Array.isArray(cells) || cells.length === 0) return;
+      const sheetLocks = locks.get(sheetId);
+
+      // 다른 사람이 잠근 셀은 제외, 최대 5000칸까지
+      const accepted = cells
+        .slice(0, 5000)
+        .filter((c) => {
+          const lk = sheetLocks?.get(cellKey(c.row, c.col));
+          return !lk || lk.userId === client.user.id;
+        })
+        .map((c) => ({
+          sheetId,
+          row: c.row,
+          col: c.col,
+          value: String(c.value ?? "").slice(0, 2000),
+          updatedBy: client.user.id,
+          updatedAt: new Date(),
+        }));
+      if (accepted.length === 0) return;
+
+      // 한 번에 upsert (트랜잭션)
+      await db.transaction(async (tx) => {
+        for (const row of accepted) {
+          await tx
+            .insert(sheetCells)
+            .values(row)
+            .onConflictDoUpdate({
+              target: [sheetCells.sheetId, sheetCells.row, sheetCells.col],
+              set: { value: row.value, updatedBy: client.user.id, updatedAt: new Date() },
+            });
+        }
+      });
+
+      broadcast(
+        {
+          type: "sheet:cells",
+          sheetId,
+          cells: accepted.map((a) => ({ row: a.row, col: a.col, value: a.value })),
+          userId: client.user.id,
+        },
+        (c) => c.sheetId === sheetId,
+      );
+      break;
+    }
+
     case "sheet:resize": {
       const { sheetId, dim, index } = raw;
       if (index < 0) return;

@@ -51,6 +51,8 @@ export default function SheetGrid({
   const [editing, setEditing] = useState<{ row: number; col: number } | null>(null);
   const [editValue, setEditValue] = useState("");
   const [denied, setDenied] = useState<string | null>(null);
+  // 현재 선택된 셀(편집 아님). 수식 입력줄·붙여넣기 기준점.
+  const [selected, setSelected] = useState<{ row: number; col: number }>({ row: 0, col: 0 });
   // 열 너비 / 행 높이 오버라이드 (기본값과 다른 것만)
   const [colWidths, setColWidths] = useState<Record<string, number>>({});
   const [rowHeights, setRowHeights] = useState<Record<string, number>>({});
@@ -84,6 +86,15 @@ export default function SheetGrid({
           setCells((prev) => {
             const next = new Map(prev);
             next.set(key(msg.row, msg.col), msg.value);
+            return next;
+          });
+          break;
+        }
+        case "sheet:cells": {
+          if (msg.sheetId !== sheetId) return;
+          setCells((prev) => {
+            const next = new Map(prev);
+            for (const c of msg.cells) next.set(key(c.row, c.col), c.value);
             return next;
           });
           break;
@@ -143,6 +154,7 @@ export default function SheetGrid({
 
   const startEdit = (row: number, col: number) => {
     if (editing) commitEdit();
+    setSelected({ row, col });
     if (locks.has(key(row, col))) {
       setDenied(`${locks.get(key(row, col))!.userName}님이 편집 중입니다.`);
       setTimeout(() => setDenied(null), 2500);
@@ -151,6 +163,38 @@ export default function SheetGrid({
     send({ type: "sheet:lock", sheetId, row, col });
     setEditing({ row, col });
     setEditValue(cells.get(key(row, col)) ?? "");
+  };
+
+  // 붙여넣기: 클립보드 TSV(탭=열, 줄바꿈=행)를 선택 셀 기준으로 분배
+  const handlePaste = (e: React.ClipboardEvent) => {
+    if (editing) return; // 셀 편집 중이면 기본 붙여넣기
+    const text = e.clipboardData.getData("text/plain");
+    if (!text) return;
+    e.preventDefault();
+
+    // 끝의 빈 줄 제거 후 행/열 분리
+    const lines = text.replace(/\r/g, "").replace(/\n$/, "").split("\n");
+    const matrix = lines.map((line) => line.split("\t"));
+
+    const base = selected;
+    const payload: { row: number; col: number; value: string }[] = [];
+    for (let i = 0; i < matrix.length; i++) {
+      for (let j = 0; j < matrix[i].length; j++) {
+        const r = base.row + i;
+        const c = base.col + j;
+        if (r >= rows || c >= cols) continue; // 시트 범위 초과 무시
+        payload.push({ row: r, col: c, value: matrix[i][j] });
+      }
+    }
+    if (payload.length === 0) return;
+
+    // 로컬 즉시 반영
+    setCells((prev) => {
+      const next = new Map(prev);
+      for (const p of payload) next.set(key(p.row, p.col), p.value);
+      return next;
+    });
+    send({ type: "sheet:set-bulk", sheetId, cells: payload });
   };
 
   const cancelEdit = () => {
@@ -250,12 +294,49 @@ export default function SheetGrid({
         )}
       </header>
 
-      <p className="mb-3 text-sm text-muted">
-        셀을 클릭해 편집하세요. 열·행 머리글의 경계선을 드래그하면 크기를 조절할 수
-        있고, 변경은 모두에게 실시간으로 공유됩니다.
+      {/* 수식 입력줄 (구글시트 스타일): 셀 주소 + 선택 셀 값 */}
+      <div className="mb-2 flex h-10 items-center gap-2">
+        <div className="flex h-full w-16 shrink-0 items-center justify-center rounded-[10px] bg-fill text-sm font-semibold text-foreground">
+          {colLabel(selected.col)}
+          {selected.row + 1}
+        </div>
+        <div className="flex h-full min-w-0 flex-1 items-center gap-2 rounded-[10px] bg-fill px-3">
+          <span className="shrink-0 select-none font-serif italic text-muted">fx</span>
+          <input
+            value={
+              editing && editing.row === selected.row && editing.col === selected.col
+                ? editValue
+                : cells.get(key(selected.row, selected.col)) ?? ""
+            }
+            onChange={(e) => {
+              if (!editing) startEdit(selected.row, selected.col);
+              setEditValue(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                commitEdit();
+              } else if (e.key === "Escape") {
+                e.preventDefault();
+                cancelEdit();
+              }
+            }}
+            placeholder="셀 값을 입력하세요"
+            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted"
+          />
+        </div>
+      </div>
+
+      <p className="mb-2 text-xs text-muted">
+        셀을 클릭해 편집하고, 머리글 경계선을 드래그해 크기를 조절하세요. 엑셀·시트에서
+        복사한 표를 붙여넣기(Ctrl+V)하면 각 셀에 나눠 들어갑니다. 변경은 실시간 공유됩니다.
       </p>
 
-      <div className="min-h-0 flex-1 overflow-auto toss-card">
+      <div
+        className="min-h-0 flex-1 overflow-auto toss-card outline-none"
+        tabIndex={0}
+        onPaste={handlePaste}
+      >
         <table className="border-collapse text-sm" style={{ tableLayout: "fixed" }}>
           <colgroup>
             <col style={{ width: ROW_HEADER_W }} />
@@ -298,16 +379,20 @@ export default function SheetGrid({
                   const k = key(r, c);
                   const lock = locks.get(k);
                   const isEditing = editing?.row === r && editing?.col === c;
+                  const isSelected = selected.row === r && selected.col === c;
                   const value = cells.get(k) ?? "";
                   return (
                     <td
                       key={c}
-                      onClick={() => !isEditing && startEdit(r, c)}
+                      onClick={() => {
+                        setSelected({ row: r, col: c });
+                        if (!isEditing) startEdit(r, c);
+                      }}
                       className="relative cursor-cell border-b border-r border-border p-0 align-top"
                       style={
                         lock
                           ? { boxShadow: `inset 0 0 0 2px ${colorForUser(lock.userId)}` }
-                          : isEditing
+                          : isEditing || isSelected
                             ? { boxShadow: "inset 0 0 0 2px var(--primary)" }
                             : undefined
                       }
