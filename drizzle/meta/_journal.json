@@ -15,6 +15,13 @@
       "when": 1782265827132,
       "tag": "0001_broad_valeria_richards",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782268188615,
+      "tag": "0002_light_thaddeus_ross",
+      "breakpoints": true
     }
   ]
 }

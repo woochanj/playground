@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "사내 커뮤니티",
-  description: "사내 구성원을 위한 게시판 커뮤니티",
+  title: "SmallHolland",
+  description: "SmallHolland 사내 커뮤니티",
 };
 
 export default function RootLayout({

@@ -2,18 +2,25 @@ import "dotenv/config";
 import { WebSocketServer, WebSocket } from "ws";
 import { parse as parseCookie } from "cookie";
 import { decode } from "@auth/core/jwt";
-import { and, asc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { db } from "../src/db";
 import {
   users,
   chatMessages,
   sheetCells,
+  sheets,
 } from "../src/db/schema";
 import type {
   ClientMessage,
   ServerMessage,
   WsUser,
   LockPayload,
+} from "../src/lib/realtime-types";
+import {
+  MIN_COL_WIDTH,
+  MAX_COL_WIDTH,
+  MIN_ROW_HEIGHT,
+  MAX_ROW_HEIGHT,
 } from "../src/lib/realtime-types";
 
 const PORT = Number(process.env.WS_PORT || 3101);
@@ -92,6 +99,12 @@ async function sendSheetSnapshot(client: Client, sheetId: number) {
     .where(eq(sheetCells.sheetId, sheetId))
     .orderBy(asc(sheetCells.row), asc(sheetCells.col));
 
+  const [sheet] = await db
+    .select({ colWidths: sheets.colWidths, rowHeights: sheets.rowHeights })
+    .from(sheets)
+    .where(eq(sheets.id, sheetId))
+    .limit(1);
+
   const sheetLocks = locks.get(sheetId);
   const lockList: LockPayload[] = sheetLocks
     ? [...sheetLocks.entries()].map(([key, v]) => {
@@ -105,6 +118,8 @@ async function sendSheetSnapshot(client: Client, sheetId: number) {
     sheetId,
     cells,
     locks: lockList,
+    colWidths: sheet?.colWidths ?? {},
+    rowHeights: sheet?.rowHeights ?? {},
   });
 }
 
@@ -217,6 +232,36 @@ async function handleMessage(client: Client, raw: ClientMessage) {
 
       broadcast(
         { type: "sheet:cell", sheetId, row, col, value: v, userId: client.user.id },
+        (c) => c.sheetId === sheetId,
+      );
+      break;
+    }
+
+    case "sheet:resize": {
+      const { sheetId, dim, index } = raw;
+      if (index < 0) return;
+      const size =
+        dim === "col"
+          ? Math.max(MIN_COL_WIDTH, Math.min(MAX_COL_WIDTH, Math.round(raw.size)))
+          : Math.max(MIN_ROW_HEIGHT, Math.min(MAX_ROW_HEIGHT, Math.round(raw.size)));
+
+      const [sheet] = await db
+        .select({ colWidths: sheets.colWidths, rowHeights: sheets.rowHeights })
+        .from(sheets)
+        .where(eq(sheets.id, sheetId))
+        .limit(1);
+      if (!sheet) return;
+
+      const map = { ...(dim === "col" ? sheet.colWidths : sheet.rowHeights) };
+      map[String(index)] = size;
+
+      await db
+        .update(sheets)
+        .set(dim === "col" ? { colWidths: map } : { rowHeights: map })
+        .where(eq(sheets.id, sheetId));
+
+      broadcast(
+        { type: "sheet:resize", sheetId, dim, index, size },
         (c) => c.sheetId === sheetId,
       );
       break;

@@ -32,7 +32,7 @@ export default function TopNav({
       <div className="mx-auto flex h-[52px] max-w-[1200px] items-center gap-7 px-6">
         {/* 로고 */}
         <Link href="/" className="text-[17px] font-extrabold tracking-tight text-foreground">
-          사내<span className="text-primary">커뮤니티</span>
+          Small<span className="text-primary">Holland</span>
         </Link>
 
         {/* 메뉴 (토스: 14px / 600 / 활성 진하게) */}

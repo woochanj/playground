@@ -9,6 +9,7 @@ import {
   pgEnum,
   index,
   uniqueIndex,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -129,8 +130,11 @@ export const chatMessages = pgTable(
 export const sheets = pgTable("sheets", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 128 }).notNull(),
-  rows: integer("rows").notNull().default(50),
-  cols: integer("cols").notNull().default(12),
+  rows: integer("rows").notNull().default(100),
+  cols: integer("cols").notNull().default(26),
+  // 열 너비/행 높이 오버라이드. 기본값과 다른 것만 저장 { "0": 160, ... }(px)
+  colWidths: jsonb("col_widths").$type<Record<string, number>>().notNull().default({}),
+  rowHeights: jsonb("row_heights").$type<Record<string, number>>().notNull().default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

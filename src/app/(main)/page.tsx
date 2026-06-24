@@ -9,7 +9,7 @@ export default async function Home() {
     <div>
       <header className="mb-8">
         <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
-          {user ? `${user.name}님, 환영해요` : "사내 커뮤니티"}
+          {user ? `${user.name}님, 환영해요` : "SmallHolland"}
         </h1>
         <p className="mt-1 text-[15px] text-body">
           채널을 골라 소식을 확인하고 이야기를 나눠보세요.

@@ -46,8 +46,8 @@ async function seed() {
   // ── 기본 공유 시트 ──
   const existingSheet = await db.select().from(sheets).limit(1);
   if (existingSheet.length === 0) {
-    await db.insert(sheets).values({ name: "공유 시트", rows: 50, cols: 12 });
-    console.log("  + 공유 시트 생성: 공유 시트 (50×12)");
+    await db.insert(sheets).values({ name: "공유 시트", rows: 100, cols: 26 });
+    console.log("  + 공유 시트 생성: 공유 시트 (100×26)");
   }
 
   console.log("✅ 시드 완료");

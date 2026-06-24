@@ -17,7 +17,9 @@ export type ClientMessage =
   // 시트: 편집 종료(잠금 해제)
   | { type: "sheet:unlock"; sheetId: number; row: number; col: number }
   // 시트: 셀 값 확정 저장
-  | { type: "sheet:set"; sheetId: number; row: number; col: number; value: string };
+  | { type: "sheet:set"; sheetId: number; row: number; col: number; value: string }
+  // 시트: 열 너비 / 행 높이 변경 (dim: "col" | "row")
+  | { type: "sheet:resize"; sheetId: number; dim: "col" | "row"; index: number; size: number };
 
 // ── 서버 → 클라이언트 ──
 export type ChatMessagePayload = {
@@ -44,8 +46,17 @@ export type LockPayload = {
 export type ServerMessage =
   // 채팅: 새 메시지 브로드캐스트
   | { type: "chat:new"; message: ChatMessagePayload }
-  // 시트: 초기 스냅샷(셀 + 현재 잠금 목록)
-  | { type: "sheet:snapshot"; sheetId: number; cells: CellPayload[]; locks: LockPayload[] }
+  // 시트: 초기 스냅샷(셀 + 잠금 + 열너비/행높이)
+  | {
+      type: "sheet:snapshot";
+      sheetId: number;
+      cells: CellPayload[];
+      locks: LockPayload[];
+      colWidths: Record<string, number>;
+      rowHeights: Record<string, number>;
+    }
+  // 시트: 열/행 크기 변경 브로드캐스트
+  | { type: "sheet:resize"; sheetId: number; dim: "col" | "row"; index: number; size: number }
   // 시트: 셀 값 변경 브로드캐스트
   | { type: "sheet:cell"; sheetId: number; row: number; col: number; value: string; userId: number }
   // 시트: 셀 잠김
@@ -56,6 +67,14 @@ export type ServerMessage =
   | { type: "sheet:lock-denied"; sheetId: number; row: number; col: number; byName: string }
   // 오류
   | { type: "error"; message: string };
+
+// 기본 셀 크기(px)와 리사이즈 한계
+export const DEFAULT_COL_WIDTH = 100;
+export const DEFAULT_ROW_HEIGHT = 32;
+export const MIN_COL_WIDTH = 48;
+export const MAX_COL_WIDTH = 600;
+export const MIN_ROW_HEIGHT = 24;
+export const MAX_ROW_HEIGHT = 300;
 
 // 사용자별 커서/잠금 색상 팔레트 (토스 톤)
 export const USER_COLORS = [
